@@ -19,596 +19,8 @@
             });
         }
     </script>
-    <style id="main-styles">
-        /* ============================================
-       基本設定
-    ============================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
-            overflow: hidden;
-            background: #0a0a0a;
-            color: #e0e0e0;
-        }
-
-        #app {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* ============================================
-       タイトル画面 - RPG風
-    ============================================ */
-        .title-screen {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .title-screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px),
-                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px);
-            pointer-events: none;
-        }
-
-        .title-content {
-            text-align: center;
-            animation: fadeIn 1.5s ease-in;
-            z-index: 1;
-        }
-
-        .game-title {
-            font-size: 4rem;
-            color: #d4af37;
-            margin-bottom: 3rem;
-            text-shadow:
-                0 0 10px rgba(212, 175, 55, 0.5),
-                0 0 20px rgba(212, 175, 55, 0.3),
-                2px 2px 4px rgba(0, 0, 0, 0.8);
-            letter-spacing: 0.2em;
-            font-weight: bold;
-            border: 3px solid #d4af37;
-            padding: 1.5rem 2rem;
-            background: rgba(10, 10, 10, 0.7);
-        }
-
-        .start-button {
-            padding: 1rem 3rem;
-            font-size: 1.3rem;
-            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
-            color: #d4af37;
-            border: 2px solid #d4af37;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            font-weight: bold;
-            letter-spacing: 0.1em;
-        }
-
-        .start-button:hover {
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* ============================================
-       ChapterGallery画面 - RPG風
-    ============================================ */
-        .chapter-gallery-screen {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
-            position: relative;
-        }
-
-        /* サイドパネル */
-        .side-panel {
-            width: 320px;
-            height: 100%;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-            border-right: 3px solid #d4af37;
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-            z-index: 10;
-        }
-
-        .side-panel.closed {
-            transform: translateX(-320px);
-        }
-
-        .side-panel-header {
-            padding: 1.5rem;
-            background: #0a0a0a;
-            border-bottom: 2px solid #d4af37;
-            position: sticky;
-            top: 0;
-            z-index: 11;
-        }
-
-        .side-panel-title {
-            font-size: 1.3rem;
-            color: #d4af37;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 0.1em;
-        }
-
-        .toggle-panel-btn {
-            position: absolute;
-            right: -40px;
-            top: 20px;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
-            border: 2px solid #d4af37;
-            border-left: none;
-            color: #d4af37;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            z-index: 12;
-        }
-
-        .toggle-panel-btn:hover {
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-        }
-
-        /* ステッパー */
-        .stepper-container {
-            padding: 1rem;
-        }
-
-        .episode-item {
-            margin-bottom: 1.5rem;
-        }
-
-        .episode-header {
-            padding: 0.8rem 1rem;
-            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
-            border-left: 4px solid #d4af37;
-            color: #d4af37;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.05em;
-        }
-
-        .chapter-list {
-            padding-left: 1rem;
-        }
-
-        .chapter-item {
-            padding: 0.7rem 1rem;
-            margin: 0.3rem 0;
-            background: #1a1a1a;
-            border: 1px solid #3a3a3a;
-            color: #a0a0a0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-            font-size: 0.95rem;
-        }
-
-        .chapter-item:hover {
-            background: #2a2a2a;
-            border-left-color: #8b7355;
-            color: #d0d0d0;
-        }
-
-        .chapter-item.active {
-            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
-            border-left-color: #d4af37;
-            color: #d4af37;
-            font-weight: bold;
-            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
-        }
-
-        /* メインコンテンツエリア */
-        .main-content-area {
-            flex: 1;
-            height: 100%;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        .chapter-title-section {
-            margin-bottom: 2rem;
-            text-align: center;
-            padding: 2rem;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-            border: 2px solid #d4af37;
-            border-radius: 5px;
-        }
-
-        .chapter-main-title {
-            font-size: 2.5rem;
-            color: #d4af37;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-            font-weight: bold;
-            letter-spacing: 0.1em;
-        }
-
-        .chapter-subtitle {
-            font-size: 1.2rem;
-            color: #8b7355;
-            letter-spacing: 0.05em;
-        }
-
-        /* イベントリスト */
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .event-card {
-            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-            border: 2px solid #3a3a3a;
-            border-radius: 5px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .event-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: #d4af37;
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .event-card:hover {
-            border-color: #d4af37;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .event-card:hover::before {
-            transform: scaleY(1);
-        }
-
-        .event-title {
-            font-size: 1.3rem;
-            color: #d4af37;
-            margin-bottom: 1rem;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-        }
-
-        .event-description {
-            font-size: 0.95rem;
-            color: #a0a0a0;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            min-height: 60px;
-        }
-
-        .event-read-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
-            color: #d4af37;
-            border: 2px solid #d4af37;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            letter-spacing: 0.1em;
-        }
-
-        .event-read-btn:hover {
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-        }
-
-        /* ============================================
-       メインゲーム画面 - RPG風
-    ============================================ */
-        .main-game-screen {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .background-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            transition: background 1s ease;
-        }
-
-        .bg-black {
-            background: #0a0a0a;
-        }
-
-        .bg-magic-tower {
-            background:
-                linear-gradient(180deg, rgba(10, 10, 10, 0.8) 0%, rgba(26, 26, 46, 0.8) 50%, rgba(10, 10, 10, 0.8) 100%),
-                repeating-linear-gradient(0deg, transparent 0px, rgba(212, 175, 55, 0.03) 1px, transparent 2px);
-        }
-
-        .bg-magic-circle {
-            background:
-                radial-gradient(circle at center, rgba(30, 90, 142, 0.3) 0%, rgba(15, 41, 71, 0.8) 50%, #0a0a0a 100%);
-        }
-
-        .character-layer {
-            position: absolute;
-            bottom: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-            display: flex;
-            gap: 2rem;
-            animation: fadeIn 0.8s ease-in;
-        }
-
-        .character-sprite {
-            font-size: 120px;
-            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.9));
-            animation: breathe 3s ease-in-out infinite;
-        }
-
-        /* メッセージウィンドウ - RPG風 */
-        .message-window {
-            position: absolute;
-            bottom: 3%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 92%;
-            max-width: 1000px;
-            background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
-            border: 3px solid #d4af37;
-            border-radius: 0;
-            padding: 1.5rem 2rem;
-            z-index: 5;
-            cursor: pointer;
-            box-shadow:
-                0 0 20px rgba(0, 0, 0, 0.9),
-                inset 0 0 30px rgba(212, 175, 55, 0.05);
-            position: relative;
-        }
-
-        .message-window::before {
-            content: '';
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            background: linear-gradient(45deg, #d4af37 0%, #8b7355 50%, #d4af37 100%);
-            z-index: -1;
-            opacity: 0.5;
-        }
-
-        .speaker-name {
-            font-size: 1.1rem;
-            color: #d4af37;
-            margin-bottom: 0.8rem;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-        }
-
-        .message-text {
-            font-size: 1.2rem;
-            color: #e0e0e0;
-            line-height: 2;
-            min-height: 60px;
-            position: relative;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-
-        .next-indicator {
-            position: absolute;
-            bottom: -5px;
-            right: 10px;
-            animation: blink 1s ease-in-out infinite;
-            color: #d4af37;
-            font-size: 1.5rem;
-        }
-
-        /* 選択肢 - RPG風 */
-        .choice-container {
-            position: absolute;
-            bottom: 28%;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            z-index: 6;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .choice-button {
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-            color: #d4af37;
-            border: 2px solid #d4af37;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 400px;
-            text-align: center;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        .choice-button:hover {
-            background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-            transform: translateX(5px);
-        }
-
-        /* ============================================
-       リザルト画面 - RPG風
-    ============================================ */
-        .result-screen {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .result-screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(0deg, rgba(212, 175, 55, 0.03) 0px, transparent 1px, transparent 2px, rgba(212, 175, 55, 0.03) 3px);
-            pointer-events: none;
-        }
-
-        .result-content {
-            text-align: center;
-            animation: fadeIn 2s ease-in;
-            z-index: 1;
-            padding: 3rem;
-            background: rgba(10, 10, 10, 0.8);
-            border: 3px solid #d4af37;
-        }
-
-        .result-title {
-            font-size: 3rem;
-            color: #d4af37;
-            margin-bottom: 2rem;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-            font-weight: bold;
-            letter-spacing: 0.1em;
-        }
-
-        .result-message {
-            font-size: 1.3rem;
-            color: #e0e0e0;
-            margin-bottom: 3rem;
-            line-height: 2;
-        }
-
-        .return-button {
-            padding: 1rem 2.5rem;
-            font-size: 1.2rem;
-            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
-            color: #d4af37;
-            border: 2px solid #d4af37;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-        }
-
-        .return-button:hover {
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* ============================================
-       アニメーション
-    ============================================ */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes breathe {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
-        }
-
-        /* ============================================
-       スクロールバー - RPG風
-    ============================================ */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-            border-left: 1px solid #3a3a3a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
-            border: 1px solid #d4af37;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
@@ -619,126 +31,10 @@
         // データ構造
         // ============================================
 
-        const episodesData = {
-            episodes: [
-                {
-                    id: "ep1",
-                    title: "Episode 1: 理の探求",
-                    chapters: [
-                        {
-                            id: "ep1-ch1",
-                            title: "Chapter 1: 始まりの塔",
-                            events: [
-                                {
-                                    id: "event-1",
-                                    title: "理の魔法使い",
-                                    description: "理の塔に住む魔法使いが、ある日不可解な現象に直面する。論理と魔法が交錯する物語の始まり。",
-                                    startStoryID: 1100
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: "ep2",
-                    title: "Episode 2: 未実装",
-                    chapters: [
-                        {
-                            id: "ep2-ch1",
-                            title: "Chapter 1: Coming Soon",
-                            events: []
-                        }
-                    ]
-                }
-            ]
-        };
+        console.log('Script loaded. Game starting...');
 
-        const scenarioData = {
-            "meta": {
-                "title": "理の魔法使い",
-                "type": "short_novel",
-                "version": "1.0"
-            },
-            "scenario": [
-                {
-                    "storyID": 1100,
-                    "scene": 0,
-                    "type": "SCENE_START",
-                    "sceneTags": ["bg_black_1280x720"],
-                    "note": "タイトル画面"
-                },
-                {
-                    "storyID": 1101,
-                    "scene": 0,
-                    "speaker": "ナレーション",
-                    "text": "理の魔法使い",
-                    "event": {
-                        "type": "TAP_NEXT",
-                        "payload": { "nextStoryID": 1110 }
-                    }
-                },
-                {
-                    "storyID": 1110,
-                    "scene": 1,
-                    "type": "SCENE_START",
-                    "sceneTags": ["bg_magic_tower_interior_1280x720"],
-                    "note": "理の塔・内部"
-                },
-                {
-                    "storyID": 1111,
-                    "scene": 1,
-                    "speaker": "主人公",
-                    "text": "……式は、間違っていないはずだ。",
-                    "tags": ["chara_mage_think_512x768"]
-                },
-                {
-                    "storyID": 1112,
-                    "scene": 1,
-                    "speaker": "主人公",
-                    "text": "原因と結果が一致しない……なぜだ?"
-                },
-                {
-                    "storyID": 1113,
-                    "scene": 1,
-                    "speaker": "使い魔",
-                    "text": "主よ。前提条件が、ひとつ欠けています。",
-                    "tags": ["chara_familiar_normal_512x512"],
-                    "event": {
-                        "type": "CHOICE",
-                        "payload": {
-                            "choices": [
-                                { "label": "前提条件を見直す", "nextStoryID": 1121 },
-                                { "label": "理論を疑う", "nextStoryID": 1122 }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "storyID": 1120,
-                    "scene": 2,
-                    "type": "SCENE_START",
-                    "sceneTags": ["bg_magic_circle_blue_1280x720"],
-                    "note": "理を再構築する結末"
-                },
-                {
-                    "storyID": 1121,
-                    "scene": 2,
-                    "speaker": "主人公",
-                    "text": "……そうか。条件定義が曖昧だった。",
-                    "flags": { "trusted_reason": true }
-                },
-                {
-                    "storyID": 1122,
-                    "scene": 2,
-                    "speaker": "主人公",
-                    "text": "理は崩れない。ただ、私の理解が足りなかっただけだ。",
-                    "event": {
-                        "type": "END",
-                        "payload": { "goto": "RESULT" }
-                    }
-                }
-            ]
-        };
+        let episodesData = null;
+        let scenarioData = null;
 
         // ============================================
         // ゲーム状態
@@ -753,16 +49,55 @@
             displayText: '',
             fullText: '',
             selectedChapter: 'ep1-ch1',
-            isPanelOpen: true
+            isTextComplete: false,
+            displayText: '',
+            fullText: '',
+            selectedChapter: 'ep1-ch1',
+            isPanelOpen: true,
+            isMenuOpen: false
         };
 
         let typewriterInterval = null;
+
+        // ============================================
+        // 初期化
+        // ============================================
+
+        async function initGame() {
+            try {
+                const [episodesRes, scenarioRes] = await Promise.all([
+                    fetch('./data/episodes.json'),
+                    fetch('./data/scenario.json')
+                ]);
+
+                if (!episodesRes.ok || !scenarioRes.ok) {
+                    throw new Error('Failed to load game data');
+                }
+
+                episodesData = await episodesRes.json();
+                scenarioData = await scenarioRes.json();
+
+                render();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('app').innerHTML = `
+                    <div style="color:white; text-align:center; padding:2rem;">
+                        <p>データの読み込みに失敗しました。</p>
+                        <p>ローカルファイルとして開いている場合は、<br>簡易Webサーバー経由でアクセスしてください。</p>
+                        <p>(${error.message})</p>
+                    </div>
+                `;
+            }
+        }
 
         // ============================================
         // 画面描画
         // ============================================
 
         function render() {
+            // データ未ロード時は何もしないかローディング表示
+            if (!episodesData || !scenarioData) return;
+
             const app = document.getElementById('app');
             app.innerHTML = '';
 
@@ -889,15 +224,30 @@
         // ============================================
 
         function renderMainGame(app) {
+            console.log('renderMainGame: Current Story ID:', gameState.currentStoryID);
             const node = scenarioData.scenario.find(n => n.storyID === gameState.currentStoryID);
+            console.log('renderMainGame: Found node:', node);
 
-            if (!node) return;
+            if (!node) {
+                console.error('renderMainGame: Node not found for ID:', gameState.currentStoryID);
+                return;
+            }
 
             if (node.type === 'SCENE_START') {
+                console.log('renderMainGame: SCENE_START detected');
                 gameState.currentSceneTags = node.sceneTags || [];
+                const currentIndex = scenarioData.scenario.findIndex(n => n.storyID === gameState.currentStoryID);
+                const nextNode = scenarioData.scenario[currentIndex + 1];
+                console.log('renderMainGame: Next node:', nextNode);
+
                 setTimeout(() => {
-                    gameState.currentStoryID++;
-                    render();
+                    if (nextNode) {
+                        console.log('renderMainGame: Transitioning to next node:', nextNode.storyID);
+                        gameState.currentStoryID = nextNode.storyID;
+                        render();
+                    } else {
+                        console.warn('renderMainGame: No next node found after SCENE_START');
+                    }
                 }, 500);
                 return;
             }
@@ -925,6 +275,23 @@
             app.innerHTML = `
         <div class="main-game-screen">
           <div class="background-layer ${bgClass}"></div>
+          
+          <header class="game-header">
+            <button class="header-btn" onclick="returnToChapterGallery()">
+              <span class="material-icons">arrow_back</span>
+              <span class="label">戻る</span>
+            </button>
+            <div class="header-right">
+              <button class="header-btn" onclick="console.log('Item box clicked')">
+                <span class="material-icons">inventory_2</span>
+              </button>
+              <button class="header-btn" onclick="toggleMenuModal()">
+                <span class="material-icons">menu</span>
+                <span class="label">メニュー</span>
+              </button>
+            </div>
+          </header>
+
           ${charaTags.length > 0 ? `<div class="character-layer">${charaHTML}</div>` : ''}
           <div class="message-window" onclick="handleMessageClick()">
             <div class="speaker-name">${node.speaker || 'ナレーション'}</div>
@@ -934,11 +301,17 @@
             </div>
           </div>
           ${choicesHTML}
+          ${renderMenuModal()}
         </div>
       `;
 
-            if (gameState.fullText !== node.text) {
+            if (node.text && gameState.fullText !== node.text) {
+                console.log('renderMainGame: Starting typewriter for text:', node.text);
                 startTypewriter(node.text);
+            } else if (!node.text) {
+                // テキストがない場合（ENDイベントなど）は完了状態にする
+                gameState.isTextComplete = true;
+                gameState.displayText = '';
             }
         }
 
@@ -1021,6 +394,7 @@
         }
 
         function startEvent(startStoryID) {
+            console.log('startEvent called with ID:', startStoryID);
             gameState.screen = 'MAIN';
             gameState.currentStoryID = startStoryID;
             gameState.flags = {};
@@ -1049,8 +423,12 @@
                 gameState.currentStoryID = node.event.payload.nextStoryID;
                 render();
             } else {
-                gameState.currentStoryID++;
-                render();
+                const currentIndex = scenarioData.scenario.findIndex(n => n.storyID === gameState.currentStoryID);
+                const nextNode = scenarioData.scenario[currentIndex + 1];
+                if (nextNode) {
+                    gameState.currentStoryID = nextNode.storyID;
+                    render();
+                }
             }
         }
 
@@ -1065,22 +443,39 @@
             render();
         }
 
-        // 初期描画
-        render();
+        function renderMenuModal() {
+            if (!gameState.isMenuOpen) return '';
+
+            return `
+        <div class="menu-modal-overlay" onclick="toggleMenuModal()">
+          <div class="menu-modal-content" onclick="event.stopPropagation()">
+            <h3 class="menu-title">メニュー</h3>
+            <button class="menu-item-btn" onclick="toggleMenuModal()">
+              <span class="material-icons">close</span> 閉じる
+            </button>
+            <button class="menu-item-btn" onclick="returnToTitle()">
+              <span class="material-icons">home</span> タイトルに戻る
+            </button>
+          </div>
+        </div>
+      `;
+        }
+
+        function toggleMenuModal() {
+            gameState.isMenuOpen = !gameState.isMenuOpen;
+            render();
+        }
+
+        function returnToTitle() {
+            gameState.screen = 'TITLE';
+            gameState.isMenuOpen = false;
+            if (typewriterInterval) clearInterval(typewriterInterval);
+            render();
+        }
+
+        // 初期化実行
+        initGame();
     </script>
 </body>
 
 </html>
-
-<!-- ============================================
-     CSS分離用エリア（style.css）
-     ============================================
-     
-     上記の<style>タグ内のCSSをそのままstyle.cssに
-     コピーして使用できます。
-     
-     HTMLファイルで使用する場合は<head>内に：
-     <link rel="stylesheet" href="style.css">
-     を追加してください。
-     
-============================================ -->
