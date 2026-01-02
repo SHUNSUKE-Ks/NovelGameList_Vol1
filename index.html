@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>理の魔法使い - ノベルゲーム</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+    <style id="main-styles">
+        /* ============================================
+       基本設定
+    ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+            overflow: hidden;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* ============================================
+       タイトル画面 - RPG風
+    ============================================ */
+        .title-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .title-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px);
+            pointer-events: none;
+        }
+
+        .title-content {
+            text-align: center;
+            animation: fadeIn 1.5s ease-in;
+            z-index: 1;
+        }
+
+        .game-title {
+            font-size: 4rem;
+            color: #d4af37;
+            margin-bottom: 3rem;
+            text-shadow:
+                0 0 10px rgba(212, 175, 55, 0.5),
+                0 0 20px rgba(212, 175, 55, 0.3),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 0.2em;
+            font-weight: bold;
+            border: 3px solid #d4af37;
+            padding: 1.5rem 2rem;
+            background: rgba(10, 10, 10, 0.7);
+        }
+
+        .start-button {
+            padding: 1rem 3rem;
+            font-size: 1.3rem;
+            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================
+       ChapterGallery画面 - RPG風
+    ============================================ */
+        .chapter-gallery-screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+            position: relative;
+        }
+
+        /* サイドパネル */
+        .side-panel {
+            width: 320px;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-right: 3px solid #d4af37;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .side-panel.closed {
+            transform: translateX(-320px);
+        }
+
+        .side-panel-header {
+            padding: 1.5rem;
+            background: #0a0a0a;
+            border-bottom: 2px solid #d4af37;
+            position: sticky;
+            top: 0;
+            z-index: 11;
+        }
+
+        .side-panel-title {
+            font-size: 1.3rem;
+            color: #d4af37;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .toggle-panel-btn {
+            position: absolute;
+            right: -40px;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+            border: 2px solid #d4af37;
+            border-left: none;
+            color: #d4af37;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 12;
+        }
+
+        .toggle-panel-btn:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* ステッパー */
+        .stepper-container {
+            padding: 1rem;
+        }
+
+        .episode-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .episode-header {
+            padding: 0.8rem 1rem;
+            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-left: 4px solid #d4af37;
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .chapter-list {
+            padding-left: 1rem;
+        }
+
+        .chapter-item {
+            padding: 0.7rem 1rem;
+            margin: 0.3rem 0;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .chapter-item:hover {
+            background: #2a2a2a;
+            border-left-color: #8b7355;
+            color: #d0d0d0;
+        }
+
+        .chapter-item.active {
+            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-left-color: #d4af37;
+            color: #d4af37;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
+        }
+
+        /* メインコンテンツエリア */
+        .main-content-area {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .chapter-title-section {
+            margin-bottom: 2rem;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 2px solid #d4af37;
+            border-radius: 5px;
+        }
+
+        .chapter-main-title {
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: #8b7355;
+            letter-spacing: 0.05em;
+        }
+
+        /* イベントリスト */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .event-card {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 2px solid #3a3a3a;
+            border-radius: 5px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #d4af37;
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .event-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .event-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .event-title {
+            font-size: 1.3rem;
+            color: #d4af37;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+
+        .event-description {
+            font-size: 0.95rem;
+            color: #a0a0a0;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            min-height: 60px;
+        }
+
+        .event-read-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .event-read-btn:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* ============================================
+       メインゲーム画面 - RPG風
+    ============================================ */
+        .main-game-screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            transition: background 1s ease;
+        }
+
+        .bg-black {
+            background: #0a0a0a;
+        }
+
+        .bg-magic-tower {
+            background:
+                linear-gradient(180deg, rgba(10, 10, 10, 0.8) 0%, rgba(26, 26, 46, 0.8) 50%, rgba(10, 10, 10, 0.8) 100%),
+                repeating-linear-gradient(0deg, transparent 0px, rgba(212, 175, 55, 0.03) 1px, transparent 2px);
+        }
+
+        .bg-magic-circle {
+            background:
+                radial-gradient(circle at center, rgba(30, 90, 142, 0.3) 0%, rgba(15, 41, 71, 0.8) 50%, #0a0a0a 100%);
+        }
+
+        .character-layer {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            display: flex;
+            gap: 2rem;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .character-sprite {
+            font-size: 120px;
+            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.9));
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        /* メッセージウィンドウ - RPG風 */
+        .message-window {
+            position: absolute;
+            bottom: 3%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 1000px;
+            background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
+            border: 3px solid #d4af37;
+            border-radius: 0;
+            padding: 1.5rem 2rem;
+            z-index: 5;
+            cursor: pointer;
+            box-shadow:
+                0 0 20px rgba(0, 0, 0, 0.9),
+                inset 0 0 30px rgba(212, 175, 55, 0.05);
+            position: relative;
+        }
+
+        .message-window::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg, #d4af37 0%, #8b7355 50%, #d4af37 100%);
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .speaker-name {
+            font-size: 1.1rem;
+            color: #d4af37;
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+
+        .message-text {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            line-height: 2;
+            min-height: 60px;
+            position: relative;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .next-indicator {
+            position: absolute;
+            bottom: -5px;
+            right: 10px;
+            animation: blink 1s ease-in-out infinite;
+            color: #d4af37;
+            font-size: 1.5rem;
+        }
+
+        /* 選択肢 - RPG風 */
+        .choice-container {
+            position: absolute;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 6;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .choice-button {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 400px;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .choice-button:hover {
+            background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: translateX(5px);
+        }
+
+        /* ============================================
+       リザルト画面 - RPG風
+    ============================================ */
+        .result-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .result-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(0deg, rgba(212, 175, 55, 0.03) 0px, transparent 1px, transparent 2px, rgba(212, 175, 55, 0.03) 3px);
+            pointer-events: none;
+        }
+
+        .result-content {
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+            z-index: 1;
+            padding: 3rem;
+            background: rgba(10, 10, 10, 0.8);
+            border: 3px solid #d4af37;
+        }
+
+        .result-title {
+            font-size: 3rem;
+            color: #d4af37;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            margin-bottom: 3rem;
+            line-height: 2;
+        }
+
+        .return-button {
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        .return-button:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* ============================================
+       アニメーション
+    ============================================ */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        /* ============================================
+       スクロールバー - RPG風
+    ============================================ */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-left: 1px solid #3a3a3a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+            border: 1px solid #d4af37;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ============================================
+        // データ構造
+        // ============================================
+
+        const episodesData = {
+            episodes: [
+                {
+                    id: "ep1",
+                    title: "Episode 1: 理の探求",
+                    chapters: [
+                        {
+                            id: "ep1-ch1",
+                            title: "Chapter 1: 始まりの塔",
+                            events: [
+                                {
+                                    id: "event-1",
+                                    title: "理の魔法使い",
+                                    description: "理の塔に住む魔法使いが、ある日不可解な現象に直面する。論理と魔法が交錯する物語の始まり。",
+                                    startStoryID: 1100
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "ep2",
+                    title: "Episode 2: 未実装",
+                    chapters: [
+                        {
+                            id: "ep2-ch1",
+                            title: "Chapter 1: Coming Soon",
+                            events: []
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const scenarioData = {
+            "meta": {
+                "title": "理の魔法使い",
+                "type": "short_novel",
+                "version": "1.0"
+            },
+            "scenario": [
+                {
+                    "storyID": 1100,
+                    "scene": 0,
+                    "type": "SCENE_START",
+                    "sceneTags": ["bg_black_1280x720"],
+                    "note": "タイトル画面"
+                },
+                {
+                    "storyID": 1101,
+                    "scene": 0,
+                    "speaker": "ナレーション",
+                    "text": "理の魔法使い",
+                    "event": {
+                        "type": "TAP_NEXT",
+                        "payload": { "nextStoryID": 1110 }
+                    }
+                },
+                {
+                    "storyID": 1110,
+                    "scene": 1,
+                    "type": "SCENE_START",
+                    "sceneTags": ["bg_magic_tower_interior_1280x720"],
+                    "note": "理の塔・内部"
+                },
+                {
+                    "storyID": 1111,
+                    "scene": 1,
+                    "speaker": "主人公",
+                    "text": "……式は、間違っていないはずだ。",
+                    "tags": ["chara_mage_think_512x768"]
+                },
+                {
+                    "storyID": 1112,
+                    "scene": 1,
+                    "speaker": "主人公",
+                    "text": "原因と結果が一致しない……なぜだ?"
+                },
+                {
+                    "storyID": 1113,
+                    "scene": 1,
+                    "speaker": "使い魔",
+                    "text": "主よ。前提条件が、ひとつ欠けています。",
+                    "tags": ["chara_familiar_normal_512x512"],
+                    "event": {
+                        "type": "CHOICE",
+                        "payload": {
+                            "choices": [
+                                { "label": "前提条件を見直す", "nextStoryID": 1121 },
+                                { "label": "理論を疑う", "nextStoryID": 1122 }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "storyID": 1120,
+                    "scene": 2,
+                    "type": "SCENE_START",
+                    "sceneTags": ["bg_magic_circle_blue_1280x720"],
+                    "note": "理を再構築する結末"
+                },
+                {
+                    "storyID": 1121,
+                    "scene": 2,
+                    "speaker": "主人公",
+                    "text": "……そうか。条件定義が曖昧だった。",
+                    "flags": { "trusted_reason": true }
+                },
+                {
+                    "storyID": 1122,
+                    "scene": 2,
+                    "speaker": "主人公",
+                    "text": "理は崩れない。ただ、私の理解が足りなかっただけだ。",
+                    "event": {
+                        "type": "END",
+                        "payload": { "goto": "RESULT" }
+                    }
+                }
+            ]
+        };
+
+        // ============================================
+        // ゲーム状態
+        // ============================================
+
+        let gameState = {
+            screen: 'TITLE', // TITLE | CHAPTER_GALLERY | MAIN | RESULT
+            currentStoryID: 1100,
+            currentSceneTags: [],
+            flags: {},
+            isTextComplete: false,
+            displayText: '',
+            fullText: '',
+            selectedChapter: 'ep1-ch1',
+            isPanelOpen: true
+        };
+
+        let typewriterInterval = null;
+
+        // ============================================
+        // 画面描画
+        // ============================================
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            switch (gameState.screen) {
+                case 'TITLE':
+                    renderTitleScreen(app);
+                    break;
+                case 'CHAPTER_GALLERY':
+                    renderChapterGallery(app);
+                    break;
+                case 'MAIN':
+                    renderMainGame(app);
+                    break;
+                case 'RESULT':
+                    renderResultScreen(app);
+                    break;
+            }
+        }
+
+        // ============================================
+        // タイトル画面
+        // ============================================
+
+        function renderTitleScreen(app) {
+            app.innerHTML = `
+        <div class="title-screen">
+          <div class="title-content">
+            <h1 class="game-title">理の魔法使い</h1>
+            <button class="start-button" onclick="goToChapterGallery()">始める</button>
+          </div>
+        </div>
+      `;
+        }
+
+        // ============================================
+        // ChapterGallery画面
+        // ============================================
+
+        function renderChapterGallery(app) {
+            const selectedChapterData = findChapterById(gameState.selectedChapter);
+            const chapterTitle = selectedChapterData ? selectedChapterData.chapter.title : '';
+            const episodeTitle = selectedChapterData ? selectedChapterData.episode.title : '';
+
+            app.innerHTML = `
+        <div class="chapter-gallery-screen">
+          ${renderSidePanel()}
+          <div class="main-content-area">
+            <div class="chapter-title-section">
+              <div class="chapter-subtitle">${episodeTitle}</div>
+              <h2 class="chapter-main-title">${chapterTitle}</h2>
+            </div>
+            ${renderEventsList()}
+          </div>
+        </div>
+      `;
+        }
+
+        function renderSidePanel() {
+            const panelClass = gameState.isPanelOpen ? '' : 'closed';
+            const toggleIcon = gameState.isPanelOpen ? '◀' : '▶';
+
+            let episodesHTML = '';
+            episodesData.episodes.forEach(episode => {
+                let chaptersHTML = '';
+                episode.chapters.forEach(chapter => {
+                    const activeClass = chapter.id === gameState.selectedChapter ? 'active' : '';
+                    chaptersHTML += `
+            <div class="chapter-item ${activeClass}" onclick="selectChapter('${chapter.id}')">
+              ${chapter.title}
+            </div>
+          `;
+                });
+
+                episodesHTML += `
+          <div class="episode-item">
+            <div class="episode-header">${episode.title}</div>
+            <div class="chapter-list">
+              ${chaptersHTML}
+            </div>
+          </div>
+        `;
+            });
+
+            return `
+        <div class="side-panel ${panelClass}">
+          <button class="toggle-panel-btn" onclick="togglePanel()">${toggleIcon}</button>
+          <div class="side-panel-header">
+            <div class="side-panel-title">目次</div>
+          </div>
+          <div class="stepper-container">
+            ${episodesHTML}
+          </div>
+        </div>
+      `;
+        }
+
+        function renderEventsList() {
+            const selectedChapterData = findChapterById(gameState.selectedChapter);
+            if (!selectedChapterData) return '<p>イベントがありません</p>';
+
+            const events = selectedChapterData.chapter.events;
+            if (events.length === 0) {
+                return '<p style="text-align: center; color: #8b7355; font-size: 1.2rem; margin-top: 3rem;">Coming Soon...</p>';
+            }
+
+            let eventsHTML = '';
+            events.forEach(event => {
+                eventsHTML += `
+          <div class="event-card" onclick="startEvent(${event.startStoryID})">
+            <h3 class="event-title">${event.title}</h3>
+            <p class="event-description">${event.description}</p>
+            <button class="event-read-btn" onclick="startEvent(${event.startStoryID}); event.stopPropagation();">
+              読む
+            </button>
+          </div>
+        `;
+            });
+
+            return `<div class="events-grid">${eventsHTML}</div>`;
+        }
+
+        // ============================================
+        // メインゲーム画面
+        // ============================================
+
+        function renderMainGame(app) {
+            const node = scenarioData.scenario.find(n => n.storyID === gameState.currentStoryID);
+
+            if (!node) return;
+
+            if (node.type === 'SCENE_START') {
+                gameState.currentSceneTags = node.sceneTags || [];
+                setTimeout(() => {
+                    gameState.currentStoryID++;
+                    render();
+                }, 500);
+                return;
+            }
+
+            const bgClass = gameState.currentSceneTags[0]?.includes('magic_tower') ? 'bg-magic-tower' :
+                gameState.currentSceneTags[0]?.includes('magic_circle') ? 'bg-magic-circle' :
+                    'bg-black';
+
+            const charaTags = node.tags?.filter(t => t.startsWith('chara_')) || [];
+            const charaHTML = charaTags.map(tag => {
+                const emoji = tag.includes('mage') ? '🧙' : tag.includes('familiar') ? '🦊' : '👤';
+                const color = tag.includes('mage') ? '#8b7dd8' : '#d88b7d';
+                return `<div class="character-sprite" style="color: ${color}">${emoji}</div>`;
+            }).join('');
+
+            const showChoices = node.event?.type === 'CHOICE' && gameState.isTextComplete;
+            const choicesHTML = showChoices ? `
+        <div class="choice-container">
+          ${node.event.payload.choices.map((c, i) =>
+                `<button class="choice-button" onclick="selectChoice(${c.nextStoryID})">${c.label}</button>`
+            ).join('')}
+        </div>
+      ` : '';
+
+            app.innerHTML = `
+        <div class="main-game-screen">
+          <div class="background-layer ${bgClass}"></div>
+          ${charaTags.length > 0 ? `<div class="character-layer">${charaHTML}</div>` : ''}
+          <div class="message-window" onclick="handleMessageClick()">
+            <div class="speaker-name">${node.speaker || 'ナレーション'}</div>
+            <div class="message-text">
+              ${gameState.displayText}
+              ${gameState.isTextComplete ? '<span class="next-indicator">▼</span>' : ''}
+            </div>
+          </div>
+          ${choicesHTML}
+        </div>
+      `;
+
+            if (gameState.fullText !== node.text) {
+                startTypewriter(node.text);
+            }
+        }
+
+        // ============================================
+        // リザルト画面
+        // ============================================
+
+        function renderResultScreen(app) {
+            const trustedReason = gameState.flags.trusted_reason || false;
+            app.innerHTML = `
+        <div class="result-screen">
+          <div class="result-content">
+            <h2 class="result-title">${trustedReason ? '真理への道' : 'エンディング'}</h2>
+            <p class="result-message">
+              ${trustedReason
+                    ? '理の魔法使いは、論理の力で謎を解いた。'
+                    : '物語は終わりを迎えた。'}
+            </p>
+            <button class="return-button" onclick="returnToChapterGallery()">チャプター選択に戻る</button>
+          </div>
+        </div>
+      `;
+        }
+
+        // ============================================
+        // ユーティリティ関数
+        // ============================================
+
+        function findChapterById(chapterId) {
+            for (let episode of episodesData.episodes) {
+                for (let chapter of episode.chapters) {
+                    if (chapter.id === chapterId) {
+                        return { episode, chapter };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function startTypewriter(text) {
+            gameState.fullText = text;
+            gameState.displayText = '';
+            gameState.isTextComplete = false;
+
+            if (typewriterInterval) clearInterval(typewriterInterval);
+
+            let index = 0;
+            typewriterInterval = setInterval(() => {
+                if (index < text.length) {
+                    gameState.displayText += text[index];
+                    index++;
+                    render();
+                } else {
+                    gameState.isTextComplete = true;
+                    clearInterval(typewriterInterval);
+                    render();
+                }
+            }, 50);
+        }
+
+        // ============================================
+        // イベントハンドラ
+        // ============================================
+
+        function goToChapterGallery() {
+            gameState.screen = 'CHAPTER_GALLERY';
+            gameState.selectedChapter = 'ep1-ch1';
+            gameState.isPanelOpen = true;
+            render();
+        }
+
+        function togglePanel() {
+            gameState.isPanelOpen = !gameState.isPanelOpen;
+            render();
+        }
+
+        function selectChapter(chapterId) {
+            gameState.selectedChapter = chapterId;
+            render();
+        }
+
+        function startEvent(startStoryID) {
+            gameState.screen = 'MAIN';
+            gameState.currentStoryID = startStoryID;
+            gameState.flags = {};
+            render();
+        }
+
+        function handleMessageClick() {
+            const node = scenarioData.scenario.find(n => n.storyID === gameState.currentStoryID);
+
+            if (!gameState.isTextComplete) {
+                if (typewriterInterval) clearInterval(typewriterInterval);
+                gameState.displayText = gameState.fullText;
+                gameState.isTextComplete = true;
+                render();
+            } else if (node.event?.type !== 'CHOICE') {
+                nextLine(node);
+            }
+        }
+
+        function nextLine(node) {
+            if (node.event?.type === 'END') {
+                gameState.flags = { ...gameState.flags, ...node.flags };
+                gameState.screen = 'RESULT';
+                render();
+            } else if (node.event?.type === 'TAP_NEXT') {
+                gameState.currentStoryID = node.event.payload.nextStoryID;
+                render();
+            } else {
+                gameState.currentStoryID++;
+                render();
+            }
+        }
+
+        function selectChoice(nextStoryID) {
+            gameState.currentStoryID = nextStoryID;
+            render();
+        }
+
+        function returnToChapterGallery() {
+            gameState.screen = 'CHAPTER_GALLERY';
+            if (typewriterInterval) clearInterval(typewriterInterval);
+            render();
+        }
+
+        // 初期描画
+        render();
+    </script>
+</body>
+
+</html>
+
+<!-- ============================================
+     CSS分離用エリア（style.css）
+     ============================================
+     
+     上記の<style>タグ内のCSSをそのままstyle.cssに
+     コピーして使用できます。
+     
+     HTMLファイルで使用する場合は<head>内に：
+     <link rel="stylesheet" href="style.css">
+     を追加してください。
+     
+============================================ -->
